@@ -10,7 +10,11 @@ class TelegramController extends Controller
 
     public function __invoke()
     {
-        $callbackName = $this->update->getCallbackQuery()->getData();
+        $callbackName = $this->update->getCallbackQuery()?->getData();
+
+        if(!$callbackName) {
+            return response()->json(['status' => 'no callback data']);
+        }
 
         [$callbackClassName, $callbackArgs] = explode(':', $callbackName);
         $callbackClassName = sprintf("App\Http\Callbacks\%sCallback", ucfirst($callbackClassName));

@@ -21,12 +21,12 @@ trait HasTelegramCallbackData
         $this->message = $this->update->getMessage();
         $this->callbackQuery = $this->update->getCallbackQuery();
 
-        if ($this->message) {
-            $this->chatId = $this->message->getChat()->getId();
-            $this->from = $this->message->getFrom();
-        } elseif ($this->callbackQuery) {
+        if ($this->callbackQuery) {
             $this->chatId = $this->callbackQuery->getMessage()->getChat()->getId();
             $this->from = $this->callbackQuery->getFrom();
+        } elseif ($this->message) {
+            $this->chatId = $this->message->getChat()->getId();
+            $this->from = $this->message->getFrom();
         }
     }
 
