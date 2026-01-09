@@ -32,22 +32,6 @@ services:
       - backend
     restart: always
 
-  swagger:
-    container_name: boysandgames_swagger
-    image: swaggerapi/swagger-ui:v5.19.0
-    ports:
-      - ${SWAGGER_PORT}:8080
-    environment:
-      SWAGGER_JSON: "/oas/index.yaml"
-      DOC_EXPANSION: "none"
-    volumes:
-      - ./src/public/oas:/oas
-    depends_on:
-      - nginx
-    networks:
-      - backend
-    restart: always
-
   redis:
     container_name: boysandgames_redis
     image: redis:7.4.2
