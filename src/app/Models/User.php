@@ -12,6 +12,14 @@ class User extends Authenticatable
 
     public $timestamps = false;
 
+    protected $fillable = [
+        'telegram_id',
+        'first_name',
+        'last_name',
+        'nickname',
+        'currency',
+    ];
+
     protected $casts = [
         'currency' => CurrencyEnum::class,
     ];
