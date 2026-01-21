@@ -1,5 +1,6 @@
 <?php
 
+use App\Telegram\Commands\AddGameCommand;
 use Telegram\Bot\Commands\HelpCommand;
 
 return [
@@ -131,6 +132,7 @@ return [
     */
     'commands' => [
         HelpCommand::class,
+        AddGameCommand::class,
     ],
 
     /*
