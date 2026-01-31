@@ -14,6 +14,7 @@ RUN apt-get update \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
         libpng-dev \
+        supervisor \
     && apt-get clean
 
 # GD (libfreetype6-dev, libjpeg62-turbo-dev, libpng-dev)

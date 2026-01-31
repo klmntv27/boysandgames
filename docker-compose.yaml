@@ -47,6 +47,26 @@ services:
       - backend
     restart: always
 
+  supervisor:
+    container_name: boysandgames_supervisor
+    build:
+      context: docker/app
+      args:
+        - PHP_VERSION=$PHP_VERSION
+        - UID=$UID
+        - GID=$GID
+    volumes:
+      - ./src:/var/www
+      - ./docker/app/config/php.ini:/usr/local/etc/php/php.ini
+      - ./docker/supervisor/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
+    command: /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+    user: ${UID}
+    depends_on:
+      - redis
+    networks:
+      - backend
+    restart: always
+
 networks:
   backend:
     driver: bridge
