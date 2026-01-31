@@ -27,12 +27,14 @@ class NotifyAboutNewRatingJob implements ShouldQueue
 
     public function handle(): void
     {
-        $gameInitiator = $this->game->initiator;
+        $users = User::all()->except($this->user->id);
 
-        Telegram::sendMessage([
-            'chat_id' => $gameInitiator->telegram_id,
-            'text' => $this->buildMessage(),
-        ]);
+        foreach ($users as $user) {
+            Telegram::sendMessage([
+                'chat_id' => $user->telegram_id,
+                'text' => $this->buildMessage(),
+            ]);
+        }
     }
 
     protected function buildMessage()
