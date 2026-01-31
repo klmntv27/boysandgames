@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\SteamRatingEnum;
 use App\Models\Attributes\HasGameAttributes;
 use App\Models\Relations\HasGameRelations;
 use Illuminate\Database\Eloquent\Model;
@@ -14,8 +13,16 @@ class Game extends Model
 
     public $timestamps = false;
 
+    protected $fillable = [
+        'initiator_id',
+        'steam_id',
+        'name',
+        'description',
+        'steam_rating',
+        'trailer_url',
+    ];
+
     protected $casts = [
-        'steam_rating' => SteamRatingEnum::class,
         'added_at' => 'datetime',
     ];
 }
