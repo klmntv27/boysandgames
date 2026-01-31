@@ -12,4 +12,9 @@ trait HasGameAttributes
 
         return round($this->ratings()->avg('rating'), 2);
     }
+
+    public function getSteamUrlAttribute(): string
+    {
+        return "https://store.steampowered.com/app/$this->steam_id";
+    }
 }

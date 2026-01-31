@@ -2,11 +2,14 @@
 
 namespace App\Telegram\Commands;
 
+use App\Helpers\MarkdownHelper;
 use App\Jobs\GetGamePricesJob;
 use App\Jobs\GetGameReviewsJob;
 use App\Jobs\RequestGameRatingJob;
 use App\Models\Game;
+use App\Models\GameImage;
 use App\Models\User;
+use App\Services\GameSteamReviewService;
 use App\Services\SteamApiGameInfoService;
 use Bus;
 use Telegram\Bot\Commands\Command;
@@ -60,15 +63,29 @@ class AddGameCommand extends Command
             ]
         );
 
+        $screenshots = $gameDetails['screenshots'] ?? [];
+        unset($gameDetails['screenshots']);
+
         $game = Game::create([
             'initiator_id' => $user->id,
             ...$gameDetails,
         ]);
 
+        foreach ($screenshots as $screenshotUrl) {
+            GameImage::create([
+                'game_id' => $game->id,
+                'url' => $screenshotUrl,
+            ]);
+        }
+
         Bus::chain([
             new GetGamePricesJob($game),
             new GetGameReviewsJob($game),
-            new RequestGameRatingJob($game)
+            new RequestGameRatingJob(
+                $game,
+                new GameSteamReviewService(),
+                new MarkdownHelper()
+            )
         ])->dispatch();
 
         $this->replyWithMessage([

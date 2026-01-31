@@ -33,9 +33,7 @@ class SteamApiGameInfoService
             'steam_id' => $appId,
             'name' => $gameData['name'] ?? null,
             'description' => $gameData['short_description'] ?? '',
-            'steam_rating' => $this->extractRating($gameData),
-            'trailer_url' => $this->extractTrailerUrl($gameData),
-            'trailer_thumbnail' => $this->extractTrailerThumbnail($gameData),
+            'screenshots' => $this->extractScreenshots($gameData),
         ];
     }
 
@@ -44,31 +42,20 @@ class SteamApiGameInfoService
         return $gameData['reviews'] ?? 'No data';
     }
 
-    private function extractTrailerUrl(array $gameData): ?string
+    private function extractScreenshots(array $gameData): array
     {
-        if (empty($gameData['movies'])) {
-            return null;
+        if (empty($gameData['screenshots'])) {
+            return [];
         }
 
-        $movie = $gameData['movies'][0];
-
-        // Новый формат (DASH/HLS)
-        return $movie['dash_h264']
-            ?? $movie['hls_h264']
-            ?? $movie['dash_av1']
-            // Старый формат (если вернется)
-            ?? $movie['webm']['480']
-            ?? $movie['webm']['max']
-            ?? null;
-    }
-
-    private function extractTrailerThumbnail(array $gameData): ?string
-    {
-        if (empty($gameData['movies'])) {
-            return null;
-        }
-
-        return $gameData['movies'][0]['thumbnail'] ?? null;
+        return array_slice(
+            array_map(
+                fn($screenshot) => $screenshot['path_full'],
+                $gameData['screenshots']
+            ),
+            0,
+            10
+        );
     }
 
     public function extractAppIdFromUrl(string $url): ?int

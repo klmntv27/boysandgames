@@ -2,6 +2,7 @@
 
 namespace App\Models\Relations;
 
+use App\Models\GameImage;
 use App\Models\Price;
 use App\Models\Rating;
 use App\Models\User;
@@ -23,5 +24,10 @@ trait HasGameRelations
     public function ratings(): HasMany
     {
         return $this->hasMany(Rating::class);
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(GameImage::class);
     }
 }

@@ -2,12 +2,12 @@
 
 namespace App\Jobs;
 
+use App\Helpers\MarkdownHelper;
 use App\Models\Game;
 use App\Models\User;
-use App\Services\ConvertReviewScoreToTitleService;
+use App\Services\GameSteamReviewService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Telegram\Bot\FileUpload\InputFile;
 use Telegram\Bot\Laravel\Facades\Telegram;
 
 class RequestGameRatingJob implements ShouldQueue
@@ -15,72 +15,121 @@ class RequestGameRatingJob implements ShouldQueue
     use Queueable;
 
     public function __construct(
-        protected Game $game
+        protected Game                   $game,
+        protected GameSteamReviewService $steamReviewService,
+        protected MarkdownHelper         $markdownHelper,
     ) {}
 
-    private function escapeMarkdownV2(string $text): string
-    {
-        $specialChars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
-
-        foreach ($specialChars as $char) {
-            $text = str_replace($char, '\\' . $char, $text);
-        }
-
-        return $text;
-    }
-
-    public function handle(ConvertReviewScoreToTitleService $convertReviewService): void
+    public function handle(): void
     {
         $initiator = $this->game->initiator;
-        $mailingList = User::query()->where('id', '!=', $initiator->id)->get();
+        $mailingList = User::all()->except($initiator->id);
 
         foreach ($mailingList as $user) {
-            $price = $this->game->prices()->where('currency', $user->currency)->first();
-            $priceText = $price ? "$price->final_price {$user->currency->symbol()}" : "Цена не указана";
+            $this->requestReview($user);
+        }
+    }
 
-            $steamUrl = "https://store.steampowered.com/app/{$this->game->steam_id}";
+    protected function requestReview(User $user): void
+    {
+        if ($this->game->images->isNotEmpty()) {
+            $this->sendWithImages($user);
+        } else {
+            $this->sendWithoutImages($user);
+        }
+    }
 
-            $message = sprintf(
-                "%s \\(@%s\\) предлагает поиграть в [%s](%s)\n\n",
-                $this->escapeMarkdownV2($initiator->first_name),
-                $this->escapeMarkdownV2($initiator->nickname),
-                $this->escapeMarkdownV2($this->game->name),
-                $steamUrl
-            );
-
-            if ($this->game->description) {
-                $message .= "*Описание:*\n||" . $this->escapeMarkdownV2($this->game->description) . "||\n\n";
-            }
-
-            if ($this->game->steam_rating) {
-                $reviewsTitle = $convertReviewService->getTitleFromScore($this->game->steam_rating);
-
-                \Log::debug($reviewsTitle);
-
-                $message .= "⭐ Отзывы: " . $this->escapeMarkdownV2($reviewsTitle) . "\n";
-            }
-
-            $message .= "💰 Цена: " . $this->escapeMarkdownV2($priceText) . "\n";
-
-            if ($this->game->trailer_url) {
-                $message .= "\n🎬 [Смотреть трейлер]({$this->game->trailer_url})";
-            }
-
-            $params = [
-                'chat_id' => $user->telegram_id,
-                'text' => $message,
-                'parse_mode' => 'MarkdownV2',
-                'disable_web_page_preview' => false,
+    protected function sendWithImages(User $user): void
+    {
+        foreach ($this->game->images as $index => $image) {
+            $item = [
+                'type' => 'photo',
+                'media' => $image->url,
             ];
 
-            if ($this->game->trailer_thumbnail) {
-                $params['photo'] = InputFile::create($this->game->trailer_thumbnail);
-                $params['caption'] = $message;
-                unset($params['text']);
-                Telegram::sendPhoto($params);
-            } else {
-                Telegram::sendMessage($params);
+            if ($index === 0) {
+                $item['caption'] = $this->buildMessage($user);
+                $item['parse_mode'] = 'MarkdownV2';
             }
+
+            $mediaGroup[] = $item;
         }
+
+        Telegram::sendMediaGroup([
+            'chat_id' => $user->telegram_id,
+            'media' => json_encode($mediaGroup ?? []),
+        ]);
+    }
+
+    protected function sendWithoutImages(User $user): void
+    {
+        Telegram::sendMessage([
+            'chat_id' => $user->telegram_id,
+            'text' => $this->buildMessage($user),
+            'parse_mode' => 'MarkdownV2',
+            'disable_web_page_preview' => false,
+        ]);
+    }
+
+    protected function buildMessage(User $user): string
+    {
+        $message = sprintf(
+            "%s \\(@%s\\) предлагает поиграть в [%s](%s)\n\n",
+            $this->markdownHelper->escapeMarkdownV2($this->game->initiator->first_name),
+            $this->markdownHelper->escapeMarkdownV2($this->game->initiator->nickname),
+            $this->markdownHelper->escapeMarkdownV2($this->game->name),
+            $this->game->steam_url
+        );
+
+        $message .= $this->buildDescription();
+        $message .= $this->buildSteamRating();
+        $message .= $this->buildPrice($user);
+
+        return $message;
+    }
+
+    protected function buildDescription(): string
+    {
+        if (is_null($this->game->description)) {
+            return '';
+        }
+
+        $lines = explode("\n", $this->markdownHelper->escapeMarkdownV2($this->game->description));
+        $quotedLines = array_map(fn($line) => '>' . $line, $lines);
+
+        return "*Описание:*\n" . implode("\n", $quotedLines) . "\n\n";
+    }
+
+    protected function buildSteamRating(): string
+    {
+        if (is_null($this->game->steam_rating)) {
+            return '';
+        }
+
+        $reviewsTitle = $this->steamReviewService->getTitleFromScore($this->game->steam_rating);
+        return "⭐ Отзывы: " . $this->markdownHelper->escapeMarkdownV2($reviewsTitle) . "\n";
+    }
+
+    protected function buildPrice(User $user): string
+    {
+        $price = $this->game->prices->where('currency', $user->currency)->first();
+        if (!$price) {
+            return "💰 Цена: Недоступно в твоём регионе\n";
+        }
+
+        $symbol = $this->markdownHelper->escapeMarkdownV2($user->currency->symbol());
+
+        if ($price->discount_percent > 0) {
+            $finalPrice = $this->markdownHelper->escapeMarkdownV2($price->final_price);
+            $initialPrice = $this->markdownHelper->escapeMarkdownV2($price->initial_price);
+            $discount = $this->markdownHelper->escapeMarkdownV2($price->discount_percent);
+
+            $priceText = "*$finalPrice $symbol* ~$initialPrice $symbol~ \\(\\-$discount%\\)";
+        } else {
+            $finalPrice = $this->markdownHelper->escapeMarkdownV2($price->final_price);
+            $priceText = "$finalPrice $symbol";
+        }
+
+        return "💰 Цена: $priceText\n";
     }
 }

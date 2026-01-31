@@ -22,8 +22,6 @@ class Game extends Model
         'name',
         'description',
         'steam_rating',
-        'trailer_url',
-        'trailer_thumbnail',
     ];
 
     protected $casts = [

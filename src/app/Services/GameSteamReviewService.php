@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-class ConvertReviewScoreToTitleService
+class GameSteamReviewService
 {
     public function getTitleFromScore(int $score): string
     {
