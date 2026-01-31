@@ -28,4 +28,24 @@ enum CurrencyEnum: int
             CurrencyEnum::KZT => '🇰🇿',
         };
     }
+
+    public function symbol(): string
+    {
+        return match ($this) {
+            CurrencyEnum::RUB => '₽',
+            CurrencyEnum::USD => '$',
+            CurrencyEnum::EUR => '€',
+            CurrencyEnum::KZT => '₸',
+        };
+    }
+
+    public function code(): string
+    {
+        return match ($this) {
+            CurrencyEnum::RUB => 'ru',
+            CurrencyEnum::USD => 'us',
+            CurrencyEnum::EUR => 'de',
+            CurrencyEnum::KZT => 'kz',
+        };
+    }
 }

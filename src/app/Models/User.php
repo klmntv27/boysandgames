@@ -6,6 +6,9 @@ use App\Enums\CurrencyEnum;
 use App\Models\Relations\HasUserRelations;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
+/**
+ * @mixin IdeHelperUser
+ */
 class User extends Authenticatable
 {
     use HasUserRelations;

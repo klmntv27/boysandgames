@@ -6,6 +6,9 @@ use App\Models\Attributes\HasGameAttributes;
 use App\Models\Relations\HasGameRelations;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @mixin IdeHelperGame
+ */
 class Game extends Model
 {
     use HasGameRelations,
@@ -20,6 +23,7 @@ class Game extends Model
         'description',
         'steam_rating',
         'trailer_url',
+        'trailer_thumbnail',
     ];
 
     protected $casts = [

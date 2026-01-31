@@ -4,7 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 
-class SteamApiService
+class SteamApiGameInfoService
 {
     private const BASE_URL = 'https://store.steampowered.com/api/appdetails';
 
@@ -21,6 +21,8 @@ class SteamApiService
 
         $data = $response->json();
 
+        \Log::debug($data);
+
         if (!isset($data[$appId]['success']) || !$data[$appId]['success']) {
             return null;
         }
@@ -33,6 +35,7 @@ class SteamApiService
             'description' => $gameData['short_description'] ?? '',
             'steam_rating' => $this->extractRating($gameData),
             'trailer_url' => $this->extractTrailerUrl($gameData),
+            'trailer_thumbnail' => $this->extractTrailerThumbnail($gameData),
         ];
     }
 
@@ -49,7 +52,23 @@ class SteamApiService
 
         $movie = $gameData['movies'][0];
 
-        return $movie['webm']['480'] ?? $movie['webm']['max'] ?? null;
+        // Новый формат (DASH/HLS)
+        return $movie['dash_h264']
+            ?? $movie['hls_h264']
+            ?? $movie['dash_av1']
+            // Старый формат (если вернется)
+            ?? $movie['webm']['480']
+            ?? $movie['webm']['max']
+            ?? null;
+    }
+
+    private function extractTrailerThumbnail(array $gameData): ?string
+    {
+        if (empty($gameData['movies'])) {
+            return null;
+        }
+
+        return $gameData['movies'][0]['thumbnail'] ?? null;
     }
 
     public function extractAppIdFromUrl(string $url): ?int

@@ -2,9 +2,13 @@
 
 namespace App\Telegram\Commands;
 
+use App\Jobs\GetGamePricesJob;
+use App\Jobs\GetGameReviewsJob;
+use App\Jobs\RequestGameRatingJob;
 use App\Models\Game;
 use App\Models\User;
-use App\Services\SteamApiService;
+use App\Services\SteamApiGameInfoService;
+use Bus;
 use Telegram\Bot\Commands\Command;
 
 class AddGameCommand extends Command
@@ -14,7 +18,7 @@ class AddGameCommand extends Command
     protected string $description = 'Добавить игру. Использование: /add <ссылка на Steam>';
 
     public function __construct(
-        private readonly SteamApiService $steamApiService
+        private readonly SteamApiGameInfoService $steamApiService
     ) {}
 
     public function handle(): void
@@ -61,8 +65,14 @@ class AddGameCommand extends Command
             ...$gameDetails,
         ]);
 
+        Bus::chain([
+            new GetGamePricesJob($game),
+            new GetGameReviewsJob($game),
+            new RequestGameRatingJob($game)
+        ])->dispatch();
+
         $this->replyWithMessage([
-            'text' => "✅ Игра \"{$game->name}\" успешно добавлена!",
+            'text' => "✅ Игра \"$game->name\" успешно добавлена!",
         ]);
     }
 }
