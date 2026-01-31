@@ -31,4 +31,15 @@ enum UserRatingEnum: int
             self::AbsolutelyYes => 'green',
         };
     }
+
+    public function emoji(): string
+    {
+        return match ($this) {
+            self::AbsolutelyNot => '🔴',
+            self::MoreNoThanYes => '🟠',
+            self::IDontKnow => '⚪',
+            self::MoreYesThanNo => '🟢',
+            self::AbsolutelyYes => '🟢',
+        };
+    }
 }

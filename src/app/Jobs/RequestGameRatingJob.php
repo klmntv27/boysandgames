@@ -2,12 +2,14 @@
 
 namespace App\Jobs;
 
+use App\Enums\UserRatingEnum;
 use App\Helpers\MarkdownHelper;
 use App\Models\Game;
 use App\Models\User;
 use App\Services\GameSteamReviewService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Telegram\Bot\Keyboard\Keyboard;
 use Telegram\Bot\Laravel\Facades\Telegram;
 
 class RequestGameRatingJob implements ShouldQueue
@@ -18,7 +20,9 @@ class RequestGameRatingJob implements ShouldQueue
         protected Game                   $game,
         protected GameSteamReviewService $steamReviewService,
         protected MarkdownHelper         $markdownHelper,
-    ) {}
+    )
+    {
+    }
 
     public function handle(): void
     {
@@ -59,6 +63,27 @@ class RequestGameRatingJob implements ShouldQueue
             'chat_id' => $user->telegram_id,
             'media' => json_encode($mediaGroup ?? []),
         ]);
+
+        $this->sendRatingRequestMessage($user);
+    }
+
+    protected function sendRatingRequestMessage(User $user): void
+    {
+        $message = "Будем играть в {$this->game->name}? \n";
+        foreach (UserRatingEnum::cases() as $rating) {
+            $message .= sprintf(
+                "%s %s - %s\n",
+                $rating->emoji(),
+                $rating->value,
+                $rating->title()
+            );
+        }
+
+        Telegram::sendMessage([
+            'chat_id' => $user->telegram_id,
+            'text' => $message,
+            'reply_markup' => $this->buildRatingKeyboard(),
+        ]);
     }
 
     protected function sendWithoutImages(User $user): void
@@ -68,6 +93,7 @@ class RequestGameRatingJob implements ShouldQueue
             'text' => $this->buildMessage($user),
             'parse_mode' => 'MarkdownV2',
             'disable_web_page_preview' => false,
+            'reply_markup' => $this->buildRatingKeyboard(),
         ]);
     }
 
@@ -131,5 +157,20 @@ class RequestGameRatingJob implements ShouldQueue
         }
 
         return "💰 Цена: $priceText\n";
+    }
+
+    protected function buildRatingKeyboard(): Keyboard
+    {
+        $buttons = array_map(
+            fn(UserRatingEnum $rating) => [
+                'text' => sprintf('%d %s', $rating->value, $rating->emoji()),
+                'callback_data' => sprintf('RateGame:%d,%d', $this->game->id, $rating->value)
+            ],
+            UserRatingEnum::cases()
+        );
+
+        return Keyboard::make([
+            'inline_keyboard' => [$buttons]
+        ]);
     }
 }
