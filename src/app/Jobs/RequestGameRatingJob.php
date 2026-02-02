@@ -109,6 +109,8 @@ class RequestGameRatingJob implements ShouldQueue
 
         $message .= $this->buildDescription();
         $message .= $this->buildSteamRating();
+        $message .= $this->buildPlayerCategories();
+        $message .= $this->buildSystemRequirements();
         $message .= $this->buildPrice($user);
 
         return $message;
@@ -134,6 +136,27 @@ class RequestGameRatingJob implements ShouldQueue
 
         $reviewsTitle = $this->steamReviewService->getTitleFromScore($this->game->steam_rating);
         return "⭐ Отзывы: " . $this->markdownHelper->escapeMarkdownV2($reviewsTitle) . "\n";
+    }
+
+    protected function buildPlayerCategories(): string
+    {
+        if (is_null($this->game->player_categories)) {
+            return '';
+        }
+
+        return "🎮 Режимы: " . $this->markdownHelper->escapeMarkdownV2($this->game->player_categories) . "\n";
+    }
+
+    protected function buildSystemRequirements(): string
+    {
+        if (is_null($this->game->system_requirements)) {
+            return '';
+        }
+
+        $lines = explode("\n", $this->markdownHelper->escapeMarkdownV2($this->game->system_requirements));
+        $quotedLines = array_map(fn($line) => '>' . $line, $lines);
+
+        return "\n*Системные требования:*\n" . implode("\n", $quotedLines) . "\n\n";
     }
 
     protected function buildPrice(User $user): string

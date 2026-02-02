@@ -21,8 +21,6 @@ class SteamApiGameInfoService
 
         $data = $response->json();
 
-        \Log::debug($data);
-
         if (!isset($data[$appId]['success']) || !$data[$appId]['success']) {
             return null;
         }
@@ -34,12 +32,9 @@ class SteamApiGameInfoService
             'name' => $gameData['name'] ?? null,
             'description' => $gameData['short_description'] ?? '',
             'screenshots' => $this->extractScreenshots($gameData),
+            'system_requirements' => $this->extractSystemRequirements($gameData),
+            'player_categories' => $this->extractPlayerCategories($gameData),
         ];
-    }
-
-    private function extractRating(array $gameData): ?string
-    {
-        return $gameData['reviews'] ?? 'No data';
     }
 
     private function extractScreenshots(array $gameData): array
@@ -58,10 +53,44 @@ class SteamApiGameInfoService
         );
     }
 
+    private function extractSystemRequirements(array $gameData): ?string
+    {
+        if (empty($gameData['pc_requirements']['minimum'])) {
+            return null;
+        }
+
+        return strip_tags(
+            str_replace('<br>', "\n", $gameData['pc_requirements']['minimum'])
+        );
+    }
+
+    private function extractPlayerCategories(array $gameData): ?string
+    {
+        if (empty($gameData['categories'])) {
+            return null;
+        }
+
+        $categories = array_map(
+            fn($category) => $category['description'] ?? '',
+            $gameData['categories']
+        );
+
+        $categories = array_filter(
+            $categories,
+            fn($category) => str_contains(strtolower($category), 'player')
+                || str_contains(strtolower($category), 'coop')
+                || str_contains(strtolower($category), 'игрок')
+                || str_contains(strtolower($category), 'кооп')
+                || str_contains(strtolower($category), 'плеер')
+        );
+
+        return !empty($categories) ? implode(', ', $categories) : null;
+    }
+
     public function extractAppIdFromUrl(string $url): ?int
     {
         if (preg_match('/store\.steampowered\.com\/app\/(\d+)/', $url, $matches)) {
-            return (int) $matches[1];
+            return (int)$matches[1];
         }
 
         return null;
