@@ -27,7 +27,7 @@ class RateGameCallback extends Callback
             return;
         }
 
-        $rating = UserRatingEnum::from($ratingValue);
+        $ratingEnum = UserRatingEnum::from($ratingValue);
 
         $rating = Rating::updateOrCreate(
             [
@@ -35,7 +35,7 @@ class RateGameCallback extends Callback
                 'user_id' => $user->id,
             ],
             [
-                'rating' => $rating,
+                'rating' => $ratingEnum,
             ]
         );
 
@@ -47,13 +47,13 @@ class RateGameCallback extends Callback
                 'text' => sprintf(
                     'Вы оценили игру "%s" на %d %s',
                     $game->name,
-                    $rating->rating->value,
-                    $rating->rating->emoji()
+                    $ratingEnum->value,
+                    $ratingEnum->emoji()
                 ),
             ]);
         } catch (TelegramResponseException $e) {
             $this->send([
-                'text' => sprintf('✅ Вы оценили игру: %d %s', $rating->value, $rating->emoji()),
+                'text' => sprintf('✅ Вы оценили игру: %d %s', $ratingEnum->value, $ratingEnum->emoji()),
             ]);
         }
     }
