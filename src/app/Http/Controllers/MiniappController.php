@@ -21,8 +21,9 @@ class MiniappController extends Controller
 
         $games = Game::select('games.*')
             ->selectRaw('AVG(ratings.rating) as average_rating')
+            ->selectRaw('COUNT(ratings.id) as ratings_count')
             ->leftJoin('ratings', 'games.id', '=', 'ratings.game_id')
-            ->with(['prices'])
+            ->with(['prices', 'initiator'])
             ->groupBy('games.id')
             ->orderByRaw('AVG(ratings.rating) IS NULL, AVG(ratings.rating) DESC')
             ->get()
@@ -41,6 +42,8 @@ class MiniappController extends Controller
                     'user_rating' => $userRating?->rating?->value,
                     'user_rating_title' => $userRating?->rating?->title(),
                     'average_rating' => $game->average_rating ? round($game->average_rating, 2) : null,
+                    'ratings_count' => (int) $game->ratings_count,
+                    'initiator_name' => $game->initiator?->first_name,
                     'price' => $price ? [
                         'initial_price' => $price->initial_price,
                         'final_price' => $price->final_price,

@@ -187,6 +187,9 @@
                                     ${game.name}
                                 </div>
                                 ${priceHtml}
+                                <div style="font-size: 13px; color: var(--tg-theme-hint-color); margin-top: 2px;">
+                                    ${game.initiator_name || 'Неизвестно'}${showRating && game.ratings_count > 0 ? ` • ${game.ratings_count} ${game.ratings_count === 1 ? 'оценка' : (game.ratings_count >= 2 && game.ratings_count <= 4 ? 'оценки' : 'оценок')}` : ''}
+                                </div>
                                 ${game.user_rating ? `<div style="font-size: 13px; color: var(--tg-theme-hint-color);">
                                     Ваша оценка: ${game.user_rating}
                                 </div>` : ''}
