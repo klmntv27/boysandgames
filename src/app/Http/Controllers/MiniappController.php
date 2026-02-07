@@ -106,17 +106,20 @@ class MiniappController extends Controller
      */
     public function gameRatings(Request $request, int $gameId)
     {
+        $game = Game::findOrFail($gameId);
+
         $ratings = Rating::where('game_id', $gameId)
             ->with('user')
             ->orderByDesc('rated_at')
             ->get()
-            ->map(function ($rating) {
+            ->map(function ($rating) use ($game) {
                 return [
                     'id' => $rating->id,
                     'rating' => $rating->rating->value,
                     'rating_title' => $rating->rating->title(),
                     'rating_emoji' => $rating->rating->emoji(),
                     'rated_at' => $rating->rated_at->format('d.m.Y H:i'),
+                    'is_initiator' => $rating->user_id === $game->initiator_id,
                     'user' => [
                         'id' => $rating->user->id,
                         'name' => trim($rating->user->first_name . ' ' . ($rating->user->last_name ?? '')),
@@ -124,6 +127,27 @@ class MiniappController extends Controller
                     ],
                 ];
             });
+
+        // Добавляем инициатора первым, если у него еще нет оценки
+        $initiator = $game->initiator;
+        if ($initiator && !$ratings->contains(fn($r) => $r['user']['id'] === $initiator->id)) {
+            $ratings->prepend([
+                'id' => null,
+                'rating' => null,
+                'rating_title' => null,
+                'rating_emoji' => null,
+                'rated_at' => null,
+                'is_initiator' => true,
+                'user' => [
+                    'id' => $initiator->id,
+                    'name' => trim($initiator->first_name . ' ' . ($initiator->last_name ?? '')),
+                    'nickname' => $initiator->nickname,
+                ],
+            ]);
+        } else {
+            // Если инициатор уже есть в списке, перемещаем его в начало
+            $ratings = $ratings->sortByDesc(fn($r) => $r['is_initiator'] ? 1 : 0)->values();
+        }
 
         return response()->json($ratings);
     }

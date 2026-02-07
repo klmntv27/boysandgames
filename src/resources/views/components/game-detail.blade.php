@@ -320,14 +320,22 @@
         ratings.forEach(rating => {
             const cell = document.createElement('div');
             cell.className = 'tgui-d3f8ac20ca81c66f';
+
+            const ratingDisplay = rating.is_initiator
+                ? '<span style="font-size: 11px; background-color: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); padding: 4px 8px; border-radius: 6px; font-weight: 500;">Инициатор</span>'
+                : (rating.rating_emoji ? `<div style="font-size: 28px;">${rating.rating_emoji}</div>` : '');
+            const ratedAtDisplay = rating.rated_at ? `<div style="font-size: 13px; color: var(--tg-theme-hint-color);">${rating.rated_at}</div>` : '';
+
             cell.innerHTML = `
                 <div class="tgui-4ffd8a3f6b55d7b7" style="padding: 12px 16px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <div style="font-weight: 500; margin-bottom: 4px;">${rating.user.name}</div>
-                            <div style="font-size: 13px; color: var(--tg-theme-hint-color);">${rating.rated_at}</div>
+                            <div style="font-weight: 500; margin-bottom: 4px;">
+                                ${rating.user.name}
+                            </div>
+                            ${ratedAtDisplay}
                         </div>
-                        <div style="font-size: 28px;">${rating.rating_emoji}</div>
+                        ${ratingDisplay}
                     </div>
                 </div>
             `;
