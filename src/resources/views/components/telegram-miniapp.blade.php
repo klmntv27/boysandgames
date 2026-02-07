@@ -63,6 +63,7 @@
         align-items: center;
         cursor: pointer;
         transition: filter 0.2s;
+        overflow: hidden;
     }
 
     .game-item:hover {
@@ -76,6 +77,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        max-width: 100%;
     }
 
     .game-price {
@@ -172,15 +174,15 @@
                 };
 
                 cell.innerHTML = `
-                    <div class="tgui-4ffd8a3f6b55d7b7" style="padding: 12px 16px; width: 100%; cursor: pointer;">
-                        <div style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
-                            <div style="font-weight: 600; color: var(--tg-theme-hint-color); min-width: 10px;">
+                    <div class="tgui-4ffd8a3f6b55d7b7" style="padding: 12px 16px; width: 100%; cursor: pointer; overflow: hidden;">
+                        <div style="display: flex; align-items: center; gap: 12px; cursor: pointer; width: 100%;">
+                            <div style="font-weight: 600; color: var(--tg-theme-hint-color); min-width: 10px; flex-shrink: 0;">
                                 ${game.number}
                             </div>
                             ${game.preview_image_url ? `
-                                <img src="${game.preview_image_url}" alt="${game.name}" style="width: 92px; height: 43px; object-fit: cover; border-radius: 4px;">
+                                <img src="${game.preview_image_url}" alt="${game.name}" style="width: 92px; height: 43px; object-fit: cover; border-radius: 4px; flex-shrink: 0;">
                             ` : ''}
-                            <div style="flex: 1; min-width: 0;">
+                            <div style="flex: 1; min-width: 0; overflow: hidden;">
                                 <div class="game-name">
                                     ${game.name}
                                 </div>
@@ -189,7 +191,7 @@
                                     Ваша оценка: ${game.user_rating}
                                 </div>` : ''}
                             </div>
-                            ${showRating ? `<div style="font-size: 20px; font-weight: 600; color: var(--tg-theme-text-color);">
+                            ${showRating ? `<div style="font-size: 20px; font-weight: 600; color: var(--tg-theme-text-color); flex-shrink: 0;">
                                 ${avgRatingDisplay}
                             </div>` : ''}
                         </div>

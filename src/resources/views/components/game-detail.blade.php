@@ -26,6 +26,8 @@
         font-size: 24px;
         font-weight: 700;
         margin-bottom: 8px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
 
     .game-meta {
