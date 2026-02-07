@@ -35,11 +35,11 @@ enum UserRatingEnum: int
     public function emoji(): string
     {
         return match ($this) {
-            self::AbsolutelyNot => '🔴',
-            self::MoreNoThanYes => '🟠',
-            self::IDontKnow => '⚪',
-            self::MoreYesThanNo => '🟢',
-            self::AbsolutelyYes => '🟢',
+            self::AbsolutelyNot => '👎',
+            self::MoreNoThanYes => '👀',
+            self::IDontKnow => '🤷‍♂️',
+            self::MoreYesThanNo => '🤞',
+            self::AbsolutelyYes => '👍',
         };
     }
 }
