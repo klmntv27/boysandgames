@@ -1,6 +1,17 @@
 @php
     use Illuminate\Support\Facades\Auth;
+    use App\Enums\UserRatingEnum;
+    use App\Enums\CurrencyEnum;
     $user = Auth::user();
+
+    $ratingEmojis = collect(UserRatingEnum::cases())->mapWithKeys(fn($case) => [$case->value => $case->emoji()])->toArray();
+    $currencyData = collect(CurrencyEnum::cases())->mapWithKeys(fn($case) => [
+        $case->value => [
+            'flag' => $case->flagEmoji(),
+            'symbol' => $case->symbol(),
+            'code' => $case->title(),
+        ]
+    ])->toArray();
 @endphp
 
 @extends('layouts.miniapp')
@@ -188,26 +199,12 @@
         <div id="ratingSection">
             <div class="section-title">Ваша оценка</div>
             <div class="rating-buttons" id="ratingButtons">
-                <button class="rating-button" onclick="rateGame(1)" data-rating="1">
-                    <span>👎</span>
-                    <span class="rating-button-label">Точно нет</span>
+                @foreach(UserRatingEnum::cases() as $rating)
+                <button class="rating-button" onclick="rateGame({{ $rating->value }})" data-rating="{{ $rating->value }}">
+                    <span>{{ $rating->emoji() }}</span>
+                    <span class="rating-button-label">{{ $rating->title() }}</span>
                 </button>
-                <button class="rating-button" onclick="rateGame(2)" data-rating="2">
-                    <span>👀</span>
-                    <span class="rating-button-label">Скорее нет</span>
-                </button>
-                <button class="rating-button" onclick="rateGame(3)" data-rating="3">
-                    <span>🤷‍♂️</span>
-                    <span class="rating-button-label">Не знаю</span>
-                </button>
-                <button class="rating-button" onclick="rateGame(4)" data-rating="4">
-                    <span>🤞</span>
-                    <span class="rating-button-label">Скорее да</span>
-                </button>
-                <button class="rating-button" onclick="rateGame(5)" data-rating="5">
-                    <span>👍</span>
-                    <span class="rating-button-label">Точно да</span>
-                </button>
+                @endforeach
             </div>
         </div>
 
@@ -221,20 +218,8 @@
     const gameId = {{ $gameId }};
     let currentUserRating = null;
 
-    const ratingEmojis = {
-        1: '👎',
-        2: '👀',
-        3: '🤷‍♂️',
-        4: '🤞',
-        5: '👍'
-    };
-
-    const currencyData = {
-        1: { flag: '🇷🇺', symbol: '₽', code: 'RUB' },
-        2: { flag: '🇺🇸', symbol: '$', code: 'USD' },
-        3: { flag: '🇪🇺', symbol: '€', code: 'EUR' },
-        4: { flag: '🇰🇿', symbol: '₸', code: 'KZT' }
-    };
+    const ratingEmojis = @json($ratingEmojis);
+    const currencyData = @json($currencyData);
 
     // Загрузка деталей игры
     async function loadGameDetail() {
@@ -298,9 +283,6 @@
         pricesContainer.innerHTML = '';
 
         Object.entries(prices).forEach(([currencyId, price]) => {
-            const currency = currencyData[currencyId];
-            if (!currency) return;
-
             const card = document.createElement('div');
             card.className = 'price-card';
 
@@ -309,12 +291,12 @@
 
             card.innerHTML = `
                 <div class="price-currency">
-                    <span>${currency.flag}</span>
-                    <span>${currency.code}</span>
+                    <span>${price.currency_flag}</span>
+                    <span>${price.currency_code}</span>
                 </div>
-                <div class="${priceClass}">${price.final_price} ${currency.symbol}</div>
+                <div class="${priceClass}">${price.final_price} ${price.currency_symbol}</div>
                 ${hasDiscount ? `
-                    <div class="price-original">${price.initial_price} ${currency.symbol}</div>
+                    <div class="price-original">${price.initial_price} ${price.currency_symbol}</div>
                     <div class="price-discount">-${price.discount_percent}%</div>
                 ` : ''}
             `;

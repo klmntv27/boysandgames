@@ -89,10 +89,14 @@ class MiniappController extends Controller
                     'initial_price' => $price->initial_price,
                     'final_price' => $price->final_price,
                     'discount_percent' => $price->discount_percent,
+                    'currency_symbol' => CurrencyEnum::from($price->currency)->symbol(),
+                    'currency_flag' => CurrencyEnum::from($price->currency)->flagEmoji(),
+                    'currency_code' => CurrencyEnum::from($price->currency)->title(),
                 ]
             ]),
             'user_rating' => $userRating?->rating?->value,
             'user_rating_title' => $userRating?->rating?->title(),
+            'user_rating_emoji' => $userRating?->rating?->emoji(),
             'average_rating' => $averageRating ? round($averageRating, 2) : null,
         ]);
     }
