@@ -67,6 +67,7 @@ class MiniappController extends Controller
             ->first();
 
         $averageRating = $game->ratings()->avg('rating');
+        $isInitiator = $game->initiator_id === $user->id;
 
         return response()->json([
             'id' => $game->id,
@@ -77,6 +78,7 @@ class MiniappController extends Controller
             'system_requirements' => $game->system_requirements,
             'player_categories' => $game->player_categories,
             'added_at' => $game->added_at,
+            'is_initiator' => $isInitiator,
             'images' => $game->images->map(fn($img) => [
                 'id' => $img->id,
                 'url' => $img->url,
@@ -133,6 +135,14 @@ class MiniappController extends Controller
 
         $user = Auth::user();
         $game = Game::findOrFail($gameId);
+
+        // Проверка: инициатор не может оценивать свою игру
+        if ($game->initiator_id === $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Вы не можете оценивать игру, которую добавили сами',
+            ], 403);
+        }
 
         $rating = Rating::updateOrCreate(
             [

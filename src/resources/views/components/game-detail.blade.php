@@ -185,28 +185,30 @@
         </div>
 
         <!-- Блок оценки игры -->
-        <div class="section-title">Ваша оценка</div>
-        <div class="rating-buttons" id="ratingButtons">
-            <button class="rating-button" onclick="rateGame(1)" data-rating="1">
-                <span>👎</span>
-                <span class="rating-button-label">Точно нет</span>
-            </button>
-            <button class="rating-button" onclick="rateGame(2)" data-rating="2">
-                <span>👀</span>
-                <span class="rating-button-label">Скорее нет</span>
-            </button>
-            <button class="rating-button" onclick="rateGame(3)" data-rating="3">
-                <span>🤷‍♂️</span>
-                <span class="rating-button-label">Не знаю</span>
-            </button>
-            <button class="rating-button" onclick="rateGame(4)" data-rating="4">
-                <span>🤞</span>
-                <span class="rating-button-label">Скорее да</span>
-            </button>
-            <button class="rating-button" onclick="rateGame(5)" data-rating="5">
-                <span>👍</span>
-                <span class="rating-button-label">Точно да</span>
-            </button>
+        <div id="ratingSection">
+            <div class="section-title">Ваша оценка</div>
+            <div class="rating-buttons" id="ratingButtons">
+                <button class="rating-button" onclick="rateGame(1)" data-rating="1">
+                    <span>👎</span>
+                    <span class="rating-button-label">Точно нет</span>
+                </button>
+                <button class="rating-button" onclick="rateGame(2)" data-rating="2">
+                    <span>👀</span>
+                    <span class="rating-button-label">Скорее нет</span>
+                </button>
+                <button class="rating-button" onclick="rateGame(3)" data-rating="3">
+                    <span>🤷‍♂️</span>
+                    <span class="rating-button-label">Не знаю</span>
+                </button>
+                <button class="rating-button" onclick="rateGame(4)" data-rating="4">
+                    <span>🤞</span>
+                    <span class="rating-button-label">Скорее да</span>
+                </button>
+                <button class="rating-button" onclick="rateGame(5)" data-rating="5">
+                    <span>👍</span>
+                    <span class="rating-button-label">Точно да</span>
+                </button>
+            </div>
         </div>
 
         <!-- Список оценок пользователей -->
@@ -261,6 +263,11 @@
                     img.onclick = () => window.open(image.url, '_blank');
                     imagesContainer.appendChild(img);
                 });
+            }
+
+            // Скрываем блок оценки, если пользователь - инициатор
+            if (game.is_initiator) {
+                document.getElementById('ratingSection').style.display = 'none';
             }
 
             // Устанавливаем текущую оценку пользователя
