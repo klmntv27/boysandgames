@@ -174,7 +174,7 @@
                 cell.innerHTML = `
                     <div class="tgui-4ffd8a3f6b55d7b7" style="padding: 12px 16px; width: 100%; cursor: pointer;">
                         <div style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
-                            <div style="font-weight: 600; color: var(--tg-theme-hint-color); min-width: 30px;">
+                            <div style="font-weight: 600; color: var(--tg-theme-hint-color); min-width: 10px;">
                                 ${game.number}
                             </div>
                             ${game.preview_image_url ? `
