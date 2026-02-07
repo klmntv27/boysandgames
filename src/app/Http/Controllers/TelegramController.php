@@ -75,9 +75,15 @@ class TelegramController extends Controller
         }
         $replyText = $replyToMessage->getCaption() ?: $replyToMessage->getText();
 
+
         if (count($lines = explode("\n\n", $replyText)) < 2) {
             $this->send(['text' => 'Вы не можете ответить на такой тип сообщения']);
             return response()->json(['status' => 'reply not found']);
+        }
+
+        if(is_null($this->message->getText() ?: null)) {
+            $this->send(['text' => 'Неподдерживаемый контент']);
+            return response()->json(['status' => 'unsupported content']);
         }
 
         foreach ($lines as $part) {
