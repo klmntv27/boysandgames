@@ -31,6 +31,7 @@ class SteamApiGameInfoService
             'steam_id' => $appId,
             'name' => $gameData['name'] ?? null,
             'description' => $gameData['short_description'] ?? '',
+            'preview_image_url' => $gameData['header_image'] ?? null,
             'screenshots' => $this->extractScreenshots($gameData),
             'system_requirements' => $this->extractSystemRequirements($gameData),
             'player_categories' => $this->extractPlayerCategories($gameData),

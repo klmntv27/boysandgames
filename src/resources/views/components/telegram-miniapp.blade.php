@@ -177,6 +177,9 @@
                             <div style="font-weight: 600; color: var(--tg-theme-hint-color); min-width: 30px;">
                                 ${game.number}
                             </div>
+                            ${game.preview_image_url ? `
+                                <img src="${game.preview_image_url}" alt="${game.name}" style="width: 92px; height: 43px; object-fit: cover; border-radius: 4px;">
+                            ` : ''}
                             <div style="flex: 1; min-width: 0;">
                                 <div class="game-name">
                                     ${game.name}

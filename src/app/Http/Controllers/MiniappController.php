@@ -37,6 +37,7 @@ class MiniappController extends Controller
                     'id' => $game->id,
                     'number' => $index + 1,
                     'name' => $game->name,
+                    'preview_image_url' => $game->preview_image_url,
                     'user_rating' => $userRating?->rating?->value,
                     'user_rating_title' => $userRating?->rating?->title(),
                     'average_rating' => $game->average_rating ? round($game->average_rating, 2) : null,

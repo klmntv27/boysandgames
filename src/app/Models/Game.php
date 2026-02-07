@@ -21,6 +21,7 @@ class Game extends Model
         'steam_id',
         'name',
         'description',
+        'preview_image_url',
         'steam_rating',
         'system_requirements',
         'player_categories',
