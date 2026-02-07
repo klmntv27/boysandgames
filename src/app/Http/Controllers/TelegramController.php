@@ -91,6 +91,12 @@ class TelegramController extends Controller
             break;
         }
 
+        $this->telegram->setMessageReaction([
+            'chat_id' => $this->message->getChat()->getId(),
+            'message_id' => $this->message->getMessageId(),
+            'reaction' => [['type' => 'emoji', 'emoji' => '👀']]
+        ]);
+
         return response()->json(['status' => 'reply processed']);
     }
 }
