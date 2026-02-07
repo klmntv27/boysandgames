@@ -28,7 +28,6 @@ class UpdateGamePreviewImages extends Command
         parent::__construct();
     }
 
-     */
     public function handle()
     {
         $games = Game::all();
