@@ -29,6 +29,7 @@
             color: var(--tg-theme-text-color);
             margin: 0;
             padding: 0;
+            font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
         }
 
         .miniapp-header {
