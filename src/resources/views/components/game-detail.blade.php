@@ -32,10 +32,16 @@
 
     .game-meta {
         display: flex;
+        align-items: baseline;
         gap: 16px;
         margin-bottom: 16px;
         color: var(--tg-theme-hint-color);
         font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .game-meta span {
+        display: inline-block;
     }
 
     .game-description {
