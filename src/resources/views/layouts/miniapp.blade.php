@@ -192,6 +192,15 @@
         document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color || '#2481cc');
         document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#ffffff');
 
+        // Если есть initData и пользователь не авторизован, отправляем на сервер
+        if (tg.initData) {
+            const url = new URL(window.location.href);
+            if (!url.searchParams.has('initData')) {
+                url.searchParams.set('initData', tg.initData);
+                window.location.href = url.toString();
+            }
+        }
+
         // Currency modal functions
         function openCurrencyModal() {
             document.getElementById('currencyModal').classList.add('active');
