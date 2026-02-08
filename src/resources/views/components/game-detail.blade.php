@@ -44,6 +44,34 @@
         white-space: pre-wrap;
     }
 
+    .game-info-section {
+        margin-bottom: 16px;
+    }
+
+    .game-info-card {
+        background-color: var(--tg-theme-secondary-bg-color, rgba(0, 0, 0, 0.03));
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+    .game-info-label {
+        font-weight: 600;
+        font-size: 15px;
+        color: var(--tg-theme-text-color);
+        margin-bottom: 8px;
+    }
+
+    .game-info-value {
+        font-size: 14px;
+        color: var(--tg-theme-hint-color);
+        line-height: 1.5;
+    }
+
+    .game-info-value.preserve-whitespace {
+        white-space: pre-wrap;
+    }
+
     .game-images {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -189,6 +217,18 @@
 
         <div class="game-description" id="gameDescription"></div>
 
+        <!-- Блок системных требований и игроков -->
+        <div id="gameInfoSection" class="game-info-section" style="display: none;">
+            <div class="game-info-card" id="systemRequirements" style="display: none;">
+                <div class="game-info-label">Системные требования</div>
+                <div class="game-info-value preserve-whitespace" id="systemRequirementsValue"></div>
+            </div>
+            <div class="game-info-card" id="playerCategories" style="display: none;">
+                <div class="game-info-label">Количество игроков</div>
+                <div class="game-info-value" id="playerCategoriesValue"></div>
+            </div>
+        </div>
+
         <div class="game-images" id="gameImages"></div>
 
         <!-- Блок цен -->
@@ -261,6 +301,22 @@
             if (game.user_rating) {
                 currentUserRating = game.user_rating;
                 updateRatingButtons();
+            }
+
+            // Загружаем системные требования и категории игроков
+            let hasGameInfo = false;
+            if (game.system_requirements) {
+                document.getElementById('systemRequirementsValue').textContent = game.system_requirements;
+                document.getElementById('systemRequirements').style.display = 'block';
+                hasGameInfo = true;
+            }
+            if (game.player_categories) {
+                document.getElementById('playerCategoriesValue').textContent = game.player_categories;
+                document.getElementById('playerCategories').style.display = 'block';
+                hasGameInfo = true;
+            }
+            if (hasGameInfo) {
+                document.getElementById('gameInfoSection').style.display = 'block';
             }
 
             // Загружаем цены
