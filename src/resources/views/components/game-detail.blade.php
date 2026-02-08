@@ -282,7 +282,16 @@
 
             // Заполняем информацию об игре
             document.getElementById('gameTitle').textContent = game.name;
-            document.getElementById('gameSteamRating').textContent = `Steam: ${game.steam_rating}%`;
+
+            // Steam рейтинг
+            const steamRatingEl = document.getElementById('gameSteamRating');
+            if (game.steam_rating !== null && game.steam_rating !== undefined) {
+                steamRatingEl.textContent = `Steam: ${game.steam_rating}%`;
+                steamRatingEl.style.display = 'inline-block';
+            } else {
+                steamRatingEl.style.display = 'none';
+            }
+
             document.getElementById('gameAddedAt').textContent = `Добавлена: ${new Date(game.added_at).toLocaleDateString('ru-RU')}`;
             document.getElementById('gameDescription').textContent = game.description;
 
