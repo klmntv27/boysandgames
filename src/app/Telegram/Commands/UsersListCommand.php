@@ -30,9 +30,10 @@ class UsersListCommand extends Command
             ->orderByDesc('ratings_avg_rating')
             ->get();
 
-        foreach ($users as $user) {
+        foreach ($users as $index => $user) {
             $message .= sprintf(
-                "%s - %.2f\n",
+                "%d. %s - %.2f\n",
+                $index + 1,
                 $user->first_name,
                 $user->ratings_avg_rating
             );
