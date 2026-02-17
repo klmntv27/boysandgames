@@ -3,6 +3,7 @@
 use App\Telegram\Commands\AddGameCommand;
 use App\Telegram\Commands\GamesTopCommand;
 use App\Telegram\Commands\HelpCommand;
+use App\Telegram\Commands\UsersListCommand;
 
 return [
     /*
@@ -134,7 +135,8 @@ return [
     'commands' => [
         HelpCommand::class,
         AddGameCommand::class,
-        GamesTopCommand::class
+        GamesTopCommand::class,
+        UsersListCommand::class
     ],
 
     /*
