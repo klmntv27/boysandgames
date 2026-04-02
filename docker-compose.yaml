@@ -9,21 +9,7 @@ services:
     ports:
       - ${NGINX_PORT}:80
     depends_on:
-      - vpn
-    networks:
-      - backend
-    restart: always
-
-  vpn:
-    container_name: boysandgames_vpn
-    image: dperson/openvpn-client
-    cap_add:
-      - NET_ADMIN
-    devices:
-      - /dev/net/tun
-    volumes:
-      - ./docker/vpn:/vpn
-    command: -o '--config /vpn/client.ovpn'
+      - app
     networks:
       - backend
     restart: always
@@ -42,8 +28,8 @@ services:
     user: ${UID}
     depends_on:
       - redis
-      - vpn
-    network_mode: "service:vpn"
+    networks:
+      - backend
     restart: always
 
   redis:
@@ -77,8 +63,8 @@ services:
     user: ${UID}
     depends_on:
       - redis
-      - vpn
-    network_mode: "service:vpn"
+    networks:
+      - backend
     restart: always
 
 networks:
